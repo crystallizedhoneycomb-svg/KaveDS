@@ -29,3 +29,5 @@ When creating an object of the KaveDS class, you need to enter the directory. It
 Other information:
 When you make an array in the file you have to make it like this: [1, 2, 3, "hello"] (the values are just examples).
 When you use an array in SetValueByKey you need to input it as such: new dynamic[] {1, 2, 3} (the values are just examples).
+
+Oh, and please leave feedback and/or report bugs!

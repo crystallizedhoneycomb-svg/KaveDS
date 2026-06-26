@@ -6,11 +6,11 @@ It works like this: In the file you have objects with keys and elements inside. 
 
 How to use:
 Download the latest .nupkg file from the **Releases** folder.
-If you want to add it to your project:
-In the command prompt, paste dotnet add package kaveDS --source "[The directory to the folder of the .nupkg file]" in your project.
+If you want to add it to one project:
+In the command prompt, paste dotnet add package KaveDS --source "[The directory to the folder that the .nupkg file is in]" in your project.
 If you want to add it to your whole computer:
 Create a folder where you store your libraries or use one if you already have (or just use a permanent folder).
-Paste this into the command prompt **one time** dotnet nuget add source "[The directory to the folder of the .nupkg file]" --name "[Your folders name or a nickname]".
+Paste this into the command prompt **one time** dotnet nuget add source "[The directory of the folder that the .nupkg file is in]" --name "[KaveDS name or a nickname]".
 Then when you want to add it to a project and you have added it globally just type dotnet add package kaveDS in the command prompt in you project.
 Then you just need to add "using kaveDS" in the top of you .cs file.
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Globalization;
 using System.ComponentModel;
 
-class KaveDS
+public class KaveDS
 {
     public string dir { get; set; }
     public string fileText { get; set; }

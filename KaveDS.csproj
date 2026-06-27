@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>KaveDS</PackageId>
+    <TargetFramework>net8.0</TargetFramework>
+    <Version>1.0.0</Version>
+    <Authors>David JP</Authors>
+    <Company>David JP</Company>
+    <RepositoryUrl>https://github.com/DavidJP662/KaveDS</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+</Project>

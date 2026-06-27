@@ -4,10 +4,8 @@ It is simpler and doesn't offer as complex storage.
 It has similar but different syntax. 
 It works like this: In the file you have objects with keys and elements inside. You define objects by typing "object", pressing space and typing the objects name. Then you put {} like in an if statement, see tue Example.kaveds file
 
-How to use:
-Download the latest .nupkg file from the **Releases** folder.
-Create a libraries folder (or just use a permanent one), put the file into that folder
-In the command prompt, paste dotnet add package KaveDS --source "[The directory to the folder that the .nupkg file is in]" in your project.
+How to install:
+Type dotnet add package KaveDS in the terminal of your project.
 
 Here are explanations of all the class members of KaveDS in the .cs file:
 Methods (recomended to use):

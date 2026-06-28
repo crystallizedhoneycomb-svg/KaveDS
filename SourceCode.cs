@@ -1,4 +1,4 @@
-﻿global using System;
+global using System;
 global using System.IO;
 global using System.Collections.Generic;
 global using System.Linq;
@@ -38,7 +38,13 @@ public class KaveDSParser
                 
             }
 
-        
+        for(int i = 0; i < fileObjectsNames.Count; i++)
+        {
+            if(fileObjectsNames[i].Contains("object"))
+            {
+                throw new Exception($"Invalid name for object {fileObjectsNames[i]}, objects can not have \"object\" in their name");
+            }
+        }
         
     }
 
@@ -51,7 +57,7 @@ public class KaveDSParser
             {
                 continue;
             }
-            if(line.Split(':')[0].Trim(' ').Trim('"') == key)
+            if(line.Split(':')[0].Trim().Trim('"') == key)
             {
                 if(line.Contains('['))
                 {
@@ -70,7 +76,7 @@ public class KaveDSParser
                     {
                         string cleanItem = elements[x].Trim().Trim('"');
                         
-                        // Spara som en int om det är en siffra, annars som en sträng
+                        
                         if (int.TryParse(cleanItem, out int intVal))
                         {
                             arrayReturn[x] = intVal;
@@ -83,6 +89,7 @@ public class KaveDSParser
                     return arrayReturn;
                 }
                 string returnValue = line.Split(':')[1].Trim().TrimEnd(';');
+                returnValue = returnValue.Trim();
                 
                 if(returnValue.StartsWith("\"") && returnValue.EndsWith("\""))
                 {
@@ -95,10 +102,12 @@ public class KaveDSParser
 
                     return cleanText;
                 }
+                
                 if(int.TryParse(returnValue, out int intValue))
                 {
                     if(!returnValue.Contains('.') && !returnValue.Contains(','))
                     {
+                        Console.WriteLine(intValue);
                         return intValue;
                     }
                 }
@@ -143,7 +152,7 @@ public class KaveDSParser
         }
     }
 
-    public void SetValueByKey(string objectName, string key,  dynamic value, int arrayIndex = -1)
+    public void SetValueByKey(string objectName, string key, dynamic value, int arrayIndex = -1)
     {
         key = key.Trim('"');
         
@@ -154,7 +163,6 @@ public class KaveDSParser
             if(currentArray is dynamic[])
             {
                 currentArray[arrayIndex] = value;
-
                 value = currentArray;
             }else
             {
@@ -162,104 +170,95 @@ public class KaveDSParser
             }
         }
 
-        List<string> fileLines = File.ReadAllLines(dir).ToList().Select(line => line.Replace("\r", "")).ToList();;
-        int objectLine = -1;
-        for(int i = 0; i < fileLines.Count; i++)
+        List<string> fileLines = File.ReadAllLines(dir).ToList().Select(line => line.Replace("\r", "")).ToList();
+        
+        int targetFileLine = -1;
+        bool insideTargetObject = false;
+
+        for (int i = 0; i < fileLines.Count; i++)
         {
-            if(fileLines[i].Contains($"object {objectName}"))
+            string currentLine = fileLines[i].Trim();
+
+            if (currentLine.StartsWith("object ") && currentLine.Contains(objectName))
             {
-                objectLine = i;
-                break;
+                insideTargetObject = true;
+                continue;
             }
-        }
-        if(objectLine == -1) 
-        {
-            throw new Exception($"Object '{objectName}' not found in the file.");
-        }
 
-        string[] objectLines = fileObjectsDict[objectName].ToString().Split("\n");
-        bool updated = false;
-        for(int i = 0; i < objectLines.Length; i++)
-        {
-           string currentLine = objectLines[i].Replace("\r", "");
-
-           if(currentLine.Contains(':') && currentLine.Split(':')[0].Trim().Trim('"') == key)
+            if (insideTargetObject)
             {
-                
-                int targetFileLine = objectLine + i;
-                if(targetFileLine < fileLines.Count)
+                if (currentLine == "}")
                 {
-                    
-                    string originalKey = currentLine.Split(':')[0].Trim();
-                    if(value is dynamic[])
+                    break;
+                }
+
+                if (currentLine.Contains(':'))
+                {
+                    string lineKey = currentLine.Split(':')[0].Trim().Trim('"');
+                    if (lineKey == key)
                     {
-                        string arrayValue = "[]";
-                        int position = 1;
-                        
-                        for(int x = 0; x < value.Length; x++)
-                        {
-                            string itemText = "";
-                            if (value[x] is string)
-                            {
-                                itemText = $"\"{value[x]}\"";
-                            }else
-                            {
-                                itemText = value[x].ToString();
-                            }
-                            if(x < value.Length - 1)
-                            {
-                                itemText += ", ";
-                            }
-                            
-                            arrayValue = arrayValue.Insert(position, itemText);
-                            position += itemText.Length;
-                        }
-                        fileLines[targetFileLine] = $"    {originalKey} : {arrayValue};";
-                        updated = true;
+                        targetFileLine = i;
                         break;
-                    }else
-                    {
-                         fileLines[targetFileLine] = $"    {originalKey} : {value};";
-                         updated = true;
-                         break;
                     }
-                     
-                   
                 }
-                else
-                {
-                    throw new Exception("Key not found");
-                }
-                
             }
         }
 
-        if(updated)
+        if (targetFileLine == -1) 
         {
-            File.WriteAllLines(dir, fileLines);
+            throw new Exception($"Key '{key}' not found inside object '{objectName}' in the file.");
+        }
 
-            //Update cached data
-            this.fileText = File.ReadAllText(dir).Replace("\r", "");;
-            this.fileObjects.Clear();
-            this.fileObjectsNames.Clear();
-            this.fileObjectsDict.Clear();
+        string originalLine = fileLines[targetFileLine];
+        string originalKey = originalLine.Split(':')[0].Trim();
 
-            this.fileObjects = fileText.Split("object").ToList();
-            fileObjects.RemoveAt(0);
-
-            for(int i = 0; i < fileObjects.Count(); i++)
+        if (value is dynamic[])
+        {
+            string arrayValue = "[]";
+            int position = 1;
+            
+            for(int x = 0; x < value.Length; x++)
             {
-               string obj = fileObjects[i];
-               string firstLine = obj.TrimStart().Split("\n")[0].Trim();
-               
-               this.fileObjectsNames.Add(firstLine);
-               this.fileObjectsDict.Add(firstLine, obj);
+                string itemText = "";
+                if (value[x] is string)
+                {
+                    itemText = $"\"{value[x]}\"";
+                }else
+                {
+                    itemText = value[x].ToString();
+                }
+                if(x < value.Length - 1)
+                {
+                    itemText += ", ";
+                }
                 
+                arrayValue = arrayValue.Insert(position, itemText);
+                position += itemText.Length;
             }
+            fileLines[targetFileLine] = $"    {originalKey} : {arrayValue};";
         }else
         {
-            throw new Exception($"Key {key} not found in object {objectName}");
+            fileLines[targetFileLine] = $"    {originalKey} : {value};";
         }
-        
+
+        File.WriteAllLines(dir, fileLines);
+
+        this.fileText = File.ReadAllText(dir).Replace("\r", "");
+        this.fileObjects.Clear();
+        this.fileObjectsNames.Clear();
+        this.fileObjectsDict.Clear();
+
+        this.fileObjects = fileText.Split("object").ToList();
+        fileObjects.RemoveAt(0);
+
+        for(int i = 0; i < fileObjects.Count(); i++)
+        {
+            string obj = fileObjects[i];
+            string firstLine = obj.TrimStart().Split('\n')[0].Trim();
+            firstLine = firstLine.Replace("{", "").Trim();
+            
+            this.fileObjectsNames.Add(firstLine);
+            this.fileObjectsDict.Add(firstLine, obj);
+        }
     }
 }

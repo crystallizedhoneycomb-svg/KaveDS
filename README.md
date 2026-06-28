@@ -21,7 +21,7 @@ fileObjectDict: A string, string dictionary in which the keys are the objects na
 
 
 Constructor:
-When creating an object of the KaveDS class, you need to enter the directory. It needs to end with .kaveds
+When creating an object of the KaveDSParser class, you need to enter the directory. It needs to end with .kaveds
 
 Other information:
 When you make an array in the file you have to make it like this: [1, 2, 3, "hello"] (the values are just examples).
